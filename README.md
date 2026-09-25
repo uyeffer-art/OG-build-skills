@@ -29,6 +29,7 @@ Each skill picks up where the previous one left off, using the artifacts (spec.m
 - `test-plan-template.md`
 - `review-checklist.md` — shared by both review skills: severity, hard rules (secrets, student/PII, prompt injection), scans, lenses
 - `review-template.md` — layout of the review file
+- `review-record-template.md` — client-facing one-page review record for a deliverable (`/ship-review record`)
 
 ## Setup
 
@@ -72,7 +73,7 @@ Works in any repo; nothing to add per project. Install once:
 # Claude Code
 mkdir -p ~/.claude/skills/ship-review
 cp ship-review.md ~/.claude/skills/ship-review/SKILL.md
-cp review-checklist.md review-template.md ~/.claude/skills/ship-review/
+cp review-checklist.md review-template.md review-record-template.md ~/.claude/skills/ship-review/
 
 # Codex CLI (same SKILL.md format)
 mkdir -p ~/.codex/skills/ship-review-verify
@@ -88,6 +89,7 @@ Use it:
 /ship-review                 # before a PR: branch vs base
 /ship-review phase 2         # after /milestone-check on Phase 2
 /ship-review audit           # before a client handoff
+/ship-review record          # one-page review record to send the client with the deliverable
 ```
 
 Then in Codex, in the same repo: `$ship-review-verify` (or `codex exec "Use the ship-review-verify skill on docs/reviews/<file>.md"`).

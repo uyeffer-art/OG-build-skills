@@ -18,6 +18,7 @@ One review procedure for every repo. Claude reviews; Codex then verifies with `s
 /ship-review <base-ref>      # diff vs a named base
 /ship-review phase <N>       # the commits for Phase N of build-plan.md
 /ship-review audit           # the whole repo (pre-handoff)
+/ship-review record [since]  # client-facing one-page review record from docs/reviews/
 ```
 
 ## Ground rules (read first, apply throughout)
@@ -33,7 +34,7 @@ One review procedure for every repo. Claude reviews; Codex then verifies with `s
 
 ## Locating the checklist and template
 
-Look in this order and use the first found: `./review-checklist.md`, `./.claude/skills/ship-review/`,
+Look in this order and use the first found (the same for `review-record-template.md`): `./review-checklist.md`, `./.claude/skills/ship-review/`,
 `~/.claude/skills/ship-review/`, `~/.codex/skills/ship-review-verify/`. If neither file is found,
 stop and tell the user to install them (see the OG-build-skills README).
 
@@ -97,6 +98,19 @@ Next: in Codex, run ship-review-verify on that file.
 Then check you stayed report-only: `git status --porcelain --untracked-files=no` must be unchanged from before
 the review, and new untracked paths may only be `docs/reviews/` plus caches the baseline created (`__pycache__`,
 `.pytest_cache`, `node_modules/.cache`, coverage output). Report anything else plainly.
+
+## Record mode (client handover)
+
+`/ship-review record [since-date-or-tag]` writes nothing new about the code. It compiles the existing
+`docs/reviews/*.md` files (since the date or tag, else all of them) into
+`docs/reviews/YYYY-MM-DD-review-record.md` using `review-record-template.md`:
+- One row per review: the first call, what was fixed, and the final call. The final call is the Codex
+  Final Verdict when present; otherwise Claude's verdict marked "(Codex not run)".
+- A FIX followed by a later SHIP review of the same scope counts as "fixed and re-reviewed".
+- **Refuse to produce a clean record** if the latest review of any scope is FIX or DISCUSS, or has no
+  Codex verification. List what is open instead.
+- Client-facing: roles, not names. No secret values, file contents or student data; findings are summarised
+  in one line each.
 
 ## Phase mode and /milestone-check
 When a `/milestone-check` report for the same phase is in the conversation or in the build plan, quote
