@@ -116,7 +116,7 @@ And a Final Verdict line exists
 ## Invariants & Edge Cases
 
 ### Properties That Must Always Hold
-- [ ] **I-1 Report-only:** the review never changes tracked files except by writing its own review file. `git diff --stat` outside `docs/reviews/` is the same before and after.
+- [ ] **I-1 Report-only:** the review never changes tracked files except by writing its own review file. Tracked files are unchanged before and after (`git status --porcelain --untracked-files=no`). New untracked paths are limited to `docs/reviews/` and caches created by the baseline.
 - [ ] **I-2 Gate:** verdict = FIX when any blocker or major finding is present or any baseline check is red. SHIP only when neither is true. DISCUSS only when a finding is marked `needs-decision`.
 - [ ] **I-3 Hard rules are blockers:** a secret, real student or staff PII, or a skill that obeys untrusted input always gets `blocker`, whatever the lens or model says.
 - [ ] **I-4 Traceability:** every finding has a `file:line` (or `repo` for repo-wide findings) and quoted evidence.

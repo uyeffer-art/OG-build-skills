@@ -125,3 +125,7 @@ See `spec.md` (US-1…US-4, I-1…I-7) and `landscape.md` (recommendation: Integ
 
 ## Work Log
 **2026-09-25:** plan created from spec.
+
+**2026-09-25, Phase 1:** fixture, checklist, template. Scans hit all hard-rule seeds on `seeded`, 0 on `clean`, "nothing to review" on an empty diff. Fixed: fixture comments labelled the defects (gave answers away), so the labels were removed.
+
+**2026-09-25, Phase 2:** `ship-review.md` written. Fixture run (checklist fallback lenses): seeded 6/6 caught, all hard-rule seeds blocker, FIX; clean 0 blockers or majors, SHIP. I-1 refined: the baseline creates `__pycache__`, so the report-only check is on tracked files.

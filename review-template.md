@@ -3,7 +3,7 @@
 > `ship-review` · [YYYY-MM-DD] · mode: [diff | phase N | audit] · reviewer: Claude Code
 > Checklist: `review-checklist.md` · Base: `[base-ref @ short-sha]` → Head: `[branch @ short-sha]`
 
-**Verdict: **[SHIP | FIX | DISCUSS]**** (Claude). Final verdict is set in *Codex Verification* below.
+Verdict: **[SHIP | FIX | DISCUSS]** (Claude). Final verdict is set in *Codex Verification* below.
 
 ## Scope
 - **Reviewed:** [N files, +A/−D lines] · [commit list for phase mode]
@@ -36,7 +36,7 @@
 - **L4 Skills/prompts** ([applied | n/a]): …
 
 ## Verdict
-**Verdict: **[SHIP | FIX | DISCUSS]****. [One sentence: why, citing the gating finding IDs or the red baseline.]
+Verdict: **[SHIP | FIX | DISCUSS]**. [One sentence: why, citing the gating finding IDs or the red baseline.]
 
 Next: run `ship-review-verify` in Codex on this file.
 
