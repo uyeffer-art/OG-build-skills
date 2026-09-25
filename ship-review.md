@@ -1,6 +1,6 @@
 ---
 name: ship-review
-description: Gated code review for any repo. Reviews the branch diff (default), one build phase (`phase N`) or the whole repo (`audit`) for correctness, security and data, and tests and simplicity; enforces hard rules (no secrets, no student/PII data, no prompt-injection holes); writes docs/reviews/<date>-<scope>.md with a SHIP / FIX / DISCUSS verdict for Codex to verify. Use before opening a PR, after each build phase, or before a client handoff. Report-only; never edits code.
+description: Gated code review for any repo. Reviews the branch diff (default), one build phase (`phase N`) or the whole repo (`audit`) for correctness, security and data, and tests and simplicity; enforces hard rules (no secrets, no student/PII data, no prompt-injection holes); writes docs/reviews/<date>-<scope>.md with a SHIP / FIX / DISCUSS verdict for Codex to verify. `discuss` settles a DISCUSS verdict by questioning the project lead one finding at a time; `record` builds the client handover record. Optional gstack lenses: /qa-only for apps with a UI, /cso in audit mode. Use before opening a PR, after each build phase, or before a client handoff. Report-only; never edits code.
 ---
 
 # Ship Review Skill
@@ -18,6 +18,7 @@ One review procedure for every repo. Claude reviews; Codex then verifies with `s
 /ship-review <base-ref>      # diff vs a named base
 /ship-review phase <N>       # the commits for Phase N of build-plan.md
 /ship-review audit           # the whole repo (pre-handoff)
+/ship-review discuss [file]  # settle a DISCUSS verdict: question the lead, record decisions
 /ship-review record [since]  # client-facing one-page review record from docs/reviews/
 ```
 
@@ -71,8 +72,18 @@ walk the checklist section. Record which you used under Lens notes.
 | L2 Security + data | `/security-review` | checklist §6 L2 + H1–H3 confirmation |
 | L3 Tests + simplicity | `/simplify` framed **report-only, do not apply** | checklist §6 L3, always including the tests-first items |
 | L4 Skills/prompts | — | checklist §6 L4, whenever skill or prompt files are in scope |
+| L5 Browser QA | gstack `/qa-only`, **only if** the repo has a UI people use (web app, dashboard) **and** gstack is installed | checklist §6 L5 by reading the UI code; note "not run in a browser" |
 
-Built-ins sometimes report in their own format. Translate every result into checklist §7 rows.
+**Audit mode only:** also run gstack `/cso` as a second L2 pass, framed **report-only: decline repair
+candidates**. Merge its findings into L2 rows; keep its coverage map summary in Lens notes.
+
+**gstack is optional.** It's installed if `~/.claude/skills/gstack/` exists (or the skills appear in your
+skill list). If it isn't, skip `/qa-only` and `/cso`, use the fallbacks, and say so in Lens notes. Never
+install it yourself. For `/qa-only` you need the app running: use the start command from the README or
+CLAUDE.md, run it against local or staging only (**never production**), and stop it afterwards. If the app
+can't be started, note that and use the fallback.
+
+Built-ins and gstack skills report in their own formats. Translate every result into checklist §7 rows.
 
 ### 4. Merge and grade
 - Deduplicate: when two lenses report the same root cause, keep one row and list both lenses.
@@ -84,7 +95,7 @@ Built-ins sometimes report in their own format. Translate every result into chec
 ### 5. Write the review
 - Path: `docs/reviews/YYYY-MM-DD-<scope>.md`, where `<scope>` is `diff-<branch>`, `phase-N` or
   `audit`. If the file exists, add `-2`, `-3`, and so on.
-- Fill `review-template.md` completely. Leave `## Codex Verification` empty.
+- Fill `review-template.md` completely. Leave `## Codex Verification` and `## Decisions` empty.
 - Don't commit it. The user decides whether to commit it.
 
 ### 6. Report in chat
@@ -99,6 +110,26 @@ Then check you stayed report-only: `git status --porcelain --untracked-files=no`
 the review, and new untracked paths may only be `docs/reviews/` plus caches the baseline created (`__pycache__`,
 `.pytest_cache`, `node_modules/.cache`, coverage output). Report anything else plainly.
 
+## Discuss mode (settling a DISCUSS verdict)
+
+`/ship-review discuss [file]` runs when the final verdict is **DISCUSS**: the two reviewers disagree on a
+blocker or major, or a finding is tagged `needs-decision`. The file is the argument, else the newest review
+whose final verdict is DISCUSS with an empty `## Decisions` section. It writes only that section.
+
+1. List the open items: every finding Codex ❌ disputed or ⚠️ regraded that is blocker or major under
+   either reviewer, plus every `needs-decision` finding. **At most 5.** If there are more, the change is
+   too big to settle this way: stop and recommend FIX (split the change or fix the clear ones first).
+2. Question the project lead **one item at a time** with AskUserQuestion. For each item, show both
+   reviewers' positions and evidence in two or three lines, then ask one pointed question, e.g. "Codex
+   says `paginate` is only ever called with even-length lists. Is that guaranteed, and where?" Options:
+   **Fix it** · **Accept as is** (a one-line reason is required) · **Need more info** (what to check).
+3. Don't argue past one follow-up. A hard-rule finding (H1–H3) **cannot be accepted as is**: only
+   "Fix it" or showing it is a false positive.
+4. Append to `## Decisions`: one row per item (`| ID | Decision | Reason | Decided by (role) | Date |`),
+   then `Decided verdict: **FIX**` if any item is Fix it or Need more info, else `Decided verdict: **SHIP**`.
+5. Never edit anything above `## Decisions`. A Decided SHIP settles the DISCUSS; a Decided FIX means fix,
+   then run `/ship-review` again.
+
 ## Record mode (client handover)
 
 `/ship-review record [since-date-or-tag]` writes nothing new about the code. It compiles the existing
@@ -107,8 +138,11 @@ the review, and new untracked paths may only be `docs/reviews/` plus caches the 
 - One row per review: the first call, what was fixed, and the final call. The final call is the Codex
   Final Verdict when present; otherwise Claude's verdict marked "(Codex not run)".
 - A FIX followed by a later SHIP review of the same scope counts as "fixed and re-reviewed".
-- **Refuse to produce a clean record** if the latest review of any scope is FIX or DISCUSS, or has no
-  Codex verification. List what is open instead.
+- A DISCUSS review counts as settled only when its `## Decisions` section exists and resolves to SHIP.
+  Each "accept as is" decision appears under *Items the project lead decided to leave as they are*,
+  with its one-line reason.
+- **Refuse to produce a clean record** if the latest review of any scope is FIX, an unsettled DISCUSS, or
+  has no Codex verification. List what is open instead.
 - Client-facing: roles, not names. No secret values, file contents or student data; findings are summarised
   in one line each.
 

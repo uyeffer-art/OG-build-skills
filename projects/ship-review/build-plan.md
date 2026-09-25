@@ -135,3 +135,5 @@ See `spec.md` (US-1…US-4, I-1…I-7) and `landscape.md` (recommendation: Integ
 - Found and fixed during the check: B-1 falsely flagged the original skills (CRLF line endings), so the command now strips `\r`.
 
 **Recommendation:** 👀 MANUAL CHECK. Everything automatable passes. Open before merging to `main`: (1) fresh-session Claude run on the fixture, (2) Codex `ship-review-verify` run, (3) Jeff skims `results/claude-seeded.md` for the right level of detail.
+
+**2026-09-25, v1.1 additions:** `/ship-review discuss` settles a DISCUSS verdict by questioning the lead one item at a time: at most 5 items, hard rules can't be accepted as is, and the result goes in a new `## Decisions` section. Optional gstack lenses: `/qa-only` as L5 Browser QA for repos with a UI (local or staging only), and `/cso` as a second L2 pass in audit mode (report-only). Both fall back to the checklist when gstack isn't installed. Record mode treats a DISCUSS as settled only via Decisions. Not yet exercised on the fixture, which has no UI and no DISCUSS case.

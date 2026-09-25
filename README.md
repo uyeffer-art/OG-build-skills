@@ -81,6 +81,8 @@ cp ship-review-verify.md ~/.codex/skills/ship-review-verify/SKILL.md
 cp review-checklist.md ~/.codex/skills/ship-review-verify/
 ```
 
+Optional: install [gstack](https://github.com/garrytan/gstack) (MIT) to add its `/qa-only` browser check for apps with a UI and its `/cso` security audit in `audit` mode. `ship-review` detects it and falls back to the checklist when it isn't installed.
+
 If a repo's CLI says "Unknown skill", also add the project-level file (`cp ship-review.md <repo>/.claude/skills/ship-review.md`), as for the other skills.
 
 Use it:
@@ -89,6 +91,7 @@ Use it:
 /ship-review                 # before a PR: branch vs base
 /ship-review phase 2         # after /milestone-check on Phase 2
 /ship-review audit           # before a client handoff
+/ship-review discuss         # final verdict was DISCUSS: answer up to 5 questions, decisions recorded
 /ship-review record          # one-page review record to send the client with the deliverable
 ```
 

@@ -65,6 +65,9 @@ in a test, or an obviously documented placeholder). They cannot be downgraded be
 
 Re-run Claude's **Baseline** commands. If any result differs, record it.
 
+L5 browser findings (from gstack `/qa-only`) need a running app. If you can't reproduce them, mark them
+`⏭ Not re-run (browser)`. That is not a dispute, and they keep Claude's severity.
+
 ### 4. Add misses
 Compare your blind-sweep candidates with Claude's findings. Each real candidate that Claude did not
 report becomes `X-n`, in the same row format as checklist §7. Before keeping it, confirm it the same
@@ -76,7 +79,7 @@ baseline.
 - If it matches Claude's verdict, **Final Verdict** is that verdict.
 - If Codex is stricter (e.g. an `X` major), the final verdict is the stricter one.
 - If Codex overturns a blocker or major that was driving FIX, the **Final Verdict is DISCUSS**, not
-  SHIP. A human settles the disagreement between the models.
+  SHIP. The project lead settles it with `/ship-review discuss` in Claude Code.
 
 ### 6. Append
 Append exactly this under `## Codex Verification`:
@@ -115,3 +118,4 @@ Then print the Agreement line and the Final Verdict in chat.
 - You are not a rubber stamp and not a contrarian. Most findings on a good review should be ✅.
 - Don't re-review the whole repo in audit mode. Verify Claude's findings and sweep the risk areas it listed.
 - Stricter project rules in `AGENTS.md` win over the checklist.
+- Never write in `## Decisions`. It belongs to `/ship-review discuss`, which runs after you.

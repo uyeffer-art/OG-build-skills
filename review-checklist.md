@@ -26,6 +26,8 @@ Tag a finding `needs-decision` when it is correct either way and the owner must 
 - **FIX:** any blocker or major, or any baseline check red.
 - **DISCUSS:** no blockers or majors, baseline green, and at least one `needs-decision`.
 - **SHIP:** none of the above. Minor and nit findings don't block.
+- **Settling DISCUSS:** only through recorded decisions (`/ship-review discuss`): at most 5 items, one
+  question each. A hard-rule finding can never be accepted as is.
 
 ## 3. Hard rules (always **blocker**, whatever else is true)
 
@@ -113,6 +115,14 @@ If no test command exists and the change adds logic, file a **major** `tests` fi
 - Side effects (push, send, delete, pay) require confirmation
 - Referenced paths and templates exist; no instructions that contradict another skill
 - Hard-coded project-isms (names, paths) in a skill meant to be generic
+
+### L5 Browser QA (only when the repo has a UI people use)
+- Preferred: gstack `/qa-only` against a local or staging copy, **never production**; report-only
+- Main flows complete: load, sign-in if any, the primary task, save or submit
+- Empty, error and loading states show something sensible; no console errors on the main flows
+- Numbers shown on screen match the data behind them for at least one checked example
+- Nothing private (tokens, other users' data, student-level records) shows up in the page, the URL or the console
+- Fallback, when there's no browser run: read the UI code for the same items and say "not run in a browser"
 
 ## 7. Finding format
 
