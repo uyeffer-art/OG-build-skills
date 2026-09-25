@@ -8,7 +8,7 @@ This repo has no build, tests or CI. It is a set of markdown skills. The baselin
 
 | # | Check | Command | Applies? |
 |---|---|---|---|
-| B-1 | Every skill has `name:` matching filename | `for f in *.md; do n=$(sed -n 's/^name: //p' "$f" \| head -1); [ -z "$n" ] \|\| [ "$n.md" = "$f" ] \|\| echo "MISMATCH $f"; done` | Yes |
+| B-1 | Every skill has `name:` matching filename | `for f in *.md; do n=$(sed -n 's/^name: //p' "$f" \| tr -d '\r' \| head -1); [ -z "$n" ] \|\| [ "$n.md" = "$f" ] \|\| echo "MISMATCH $f"; done` | Yes |
 | B-2 | Existing OG skills untouched | `git diff --stat main -- interview.md landscape.md feature-spec.md plan.md test-plan.md milestone-check.md *-template.md \| grep -v review-template` | Yes (expect empty) |
 | B-3 | No real secrets in repo | checklist §Scans secret regex over tracked files, excluding `fixtures/` | Yes (expect 0) |
 

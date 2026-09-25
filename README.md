@@ -5,8 +5,8 @@ A set of Claude Code skills for going from feature idea → spec → build plan,
 ## The pipeline
 
 ```
-/interview   →  /landscape   →  /feature-spec   →  /plan   →  /test-plan   →  /milestone-check
-(requirements)  (build-vs-adopt)  (spec.md)         (build-plan.md)  (test-plan.md)  (verify phases)
+/interview   →  /landscape   →  /feature-spec   →  /plan   →  /test-plan   →  /milestone-check  →  /ship-review  →  ship-review-verify
+(requirements)  (build-vs-adopt)  (spec.md)         (build-plan.md)  (test-plan.md)  (verify phases)     (Claude review)   (Codex checks it)
 ```
 
 Each skill picks up where the previous one left off, using the artifacts (spec.md, build-plan.md, etc.) as context.
@@ -20,11 +20,15 @@ Each skill picks up where the previous one left off, using the artifacts (spec.m
 - `plan.md` — generate build-plan.md from spec
 - `test-plan.md` — generate test-plan.md from spec + build plan
 - `milestone-check.md` — verify a build phase's success criteria
+- `ship-review.md` — gated code review for any repo (diff / `phase N` / `audit`) → `docs/reviews/<date>-<scope>.md` + SHIP/FIX/DISCUSS
+- `ship-review-verify.md` — **Codex** skill: blind sweep, then confirms/disputes Claude's findings, appends the final verdict
 
 **Templates** (the skills read these at runtime — keep them where the skills can find them):
 - `spec-template.md`
 - `build-plan-template.md`
 - `test-plan-template.md`
+- `review-checklist.md` — shared by both review skills: severity, hard rules (secrets, student/PII, prompt injection), scans, lenses
+- `review-template.md` — layout of the review file
 
 ## Setup
 
@@ -59,6 +63,37 @@ Without the project-level file, the CLI rejects the command with "Unknown skill"
 The skills reference templates by path. Either:
 - **(a)** Edit the skills to point to wherever you put the templates (search for `system/templates/` in the skill files), or
 - **(b)** Put the templates at `system/templates/` relative to your project root and the skills work as-is.
+
+## Code review: `/ship-review` (Claude) + `ship-review-verify` (Codex)
+
+Works in any repo; nothing to add per project. Install once:
+
+```bash
+# Claude Code
+mkdir -p ~/.claude/skills/ship-review
+cp ship-review.md ~/.claude/skills/ship-review/SKILL.md
+cp review-checklist.md review-template.md ~/.claude/skills/ship-review/
+
+# Codex CLI (same SKILL.md format)
+mkdir -p ~/.codex/skills/ship-review-verify
+cp ship-review-verify.md ~/.codex/skills/ship-review-verify/SKILL.md
+cp review-checklist.md ~/.codex/skills/ship-review-verify/
+```
+
+If a repo's CLI says "Unknown skill", also add the project-level file (`cp ship-review.md <repo>/.claude/skills/ship-review.md`), as for the other skills.
+
+Use it:
+
+```
+/ship-review                 # before a PR: branch vs base
+/ship-review phase 2         # after /milestone-check on Phase 2
+/ship-review audit           # before a client handoff
+```
+
+Then in Codex, in the same repo: `$ship-review-verify` (or `codex exec "Use the ship-review-verify skill on docs/reviews/<file>.md"`).
+The Final Verdict at the bottom of the review file is the one that counts. **FIX** means don't open or merge the PR; **DISCUSS** means the two models disagree and you decide.
+
+Test it on the seeded fixture: `bash projects/ship-review/fixtures/make-fixture.sh /tmp/srfx`, then `cd /tmp/srfx && git checkout seeded` and run both skills. Compare with `projects/ship-review/fixtures/EXPECTED.md`. Design docs are in `projects/ship-review/`.
 
 ## BrainDrive-isms to know about
 

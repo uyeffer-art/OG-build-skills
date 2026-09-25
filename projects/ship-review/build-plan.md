@@ -48,9 +48,9 @@ See `spec.md` (US-1…US-4, I-1…I-7) and `landscape.md` (recommendation: Integ
 
 | Phase | Goal | Owner | Status |
 |---|---|---|---|
-| 1 | Fixture + checklist + template | Claude | Not Started |
-| 2 | Claude skill passes fixture | Claude | Not Started |
-| 3 | Codex skill + install docs | Claude → Jeff runs Codex | Not Started |
+| 1 | Fixture + checklist + template | Claude | Complete |
+| 2 | Claude skill passes fixture | Claude | Complete (human checkpoint open) |
+| 3 | Codex skill + install docs | Claude → Jeff runs Codex | In Progress (3.3 = Jeff) |
 
 ### Phase 1: Foundation (fixture, checklist, template)
 | # | Task | US | Status |
@@ -129,3 +129,9 @@ See `spec.md` (US-1…US-4, I-1…I-7) and `landscape.md` (recommendation: Integ
 **2026-09-25, Phase 1:** fixture, checklist, template. Scans hit all hard-rule seeds on `seeded`, 0 on `clean`, "nothing to review" on an empty diff. Fixed: fixture comments labelled the defects (gave answers away), so the labels were removed.
 
 **2026-09-25, Phase 2:** `ship-review.md` written. Fixture run (checklist fallback lenses): seeded 6/6 caught, all hard-rule seeds blocker, FIX; clean 0 blockers or majors, SHIP. I-1 refined: the baseline creates `__pycache__`, so the report-only check is on tracked files.
+
+**2026-09-25, Phase 3 + `/milestone-check all`:** `ship-review-verify.md` and the README install section written; install commands dry-run into a temp HOME (all 5 files land). Milestone check: **16/16 automated ✅** (fixture, scans hit/silent/no-echo, template, frontmatter, seeded 6/6 + hard rules blocker + FIX, clean SHIP, codex skill structure, README, B-1..B-3). ⏭ 3.3 Codex live run is manual; Codex is not installed in the build container.
+- **Caveat:** the Phase 2 fixture run was done by the same session that wrote the fixture, so it is not blind. The real recall test is a **fresh** Claude session running `/ship-review` on `seeded` and `clean`, then Codex.
+- Found and fixed during the check: B-1 falsely flagged the original skills (CRLF line endings), so the command now strips `\r`.
+
+**Recommendation:** 👀 MANUAL CHECK. Everything automatable passes. Open before merging to `main`: (1) fresh-session Claude run on the fixture, (2) Codex `ship-review-verify` run, (3) Jeff skims `results/claude-seeded.md` for the right level of detail.
