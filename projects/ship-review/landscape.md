@@ -45,6 +45,26 @@ findings, producing a dated file and a SHIP / FIX / DISCUSS verdict.
 - **Notes:** open-code-review's hybrid design (deterministic file selection + LLM reasoning) is worth copying: our skill
   runs deterministic scans (secret/PII greps, baseline commands) *before* the LLM lenses
 
+### gstack (garrytan/gstack): *added 2026-09-25; missed in the first pass*
+- **Repo:** https://github.com/garrytan/gstack | **License:** MIT | **Stars:** ~134K | **Health:** High (very active, 400+ commits)
+- **What it does:** 40+ opinionated Claude Code skills (plan reviews, code review, security, QA, shipping, safety guards). Installs to
+  `~/.claude/skills/gstack`; `./setup --host codex` also installs to `~/.codex/skills/gstack-*`
+- **Review-relevant skills** (per its README and `docs/skills.md`; none of them has been run here):
+
+| Skill | What it does | Edits code? | Overlaps with |
+|---|---|---|---|
+| `/review` | Staff-engineer review for bugs that pass CI; advisory, never blocks | **Yes**, auto-fixes obvious issues | `/code-review` (L1) |
+| `/cso` | Security audit, OWASP + STRIDE, findings independently challenged, explicit coverage map, optional runtime testing | Can generate repair candidates | `/security-review` (L2) |
+| `/codex` | Independent review / challenge by Codex CLI; advisory | No | `ship-review-verify` |
+| `/qa-only` | Drives a real browser against the app and reports bugs with repro steps | No (report-only) | Nothing; we have no browser/UI lens |
+| `/careful` | Warns before destructive commands (rm -rf, DROP TABLE, force-push) | No | Nothing; a guard for *fix* sessions, not review |
+| `/ship` | Sync, test, coverage audit, push, open PR | Yes | Nothing; runs *after* a SHIP verdict |
+
+- **Coverage:** Medium–High for lenses; **Fit:** High (same SKILL.md format, both agents)
+- **Gaps vs. our requirements:** no hard rules for student/PII data; no shared rubric across the two models; `/codex` does an
+  independent review rather than checking Claude's findings; no persisted review file with a gated verdict; no client record.
+  `/review` and `/cso` can modify code, which conflicts with report-only (I-1) unless run in a report-only framing.
+
 ### Research signal: cross-vendor review
 - MindStudio write-up and a 2026 arXiv study ("Cross-Model LLM Code Review", 2607.21656 — abstract only, full text not
   fetched) report that a second vendor surfaces issues a same-model loop misses. SEVRA-BENCH (2606.13757) shows review
@@ -61,6 +81,7 @@ findings, producing a dated file and a SHIP / FIX / DISCUSS verdict.
 | Codex `/review` / `codex review` | Medium | High | High | Apache-2.0 | Second model; takes a prompt |
 | SKILL.md format | — | High | High | Open | One format for both agents |
 | PR bots (OSS) | Medium | Med–High | Low | MIT/Apache | CI + keys; single model; comments |
+| gstack | Med–High | High | High | MIT | Strong lenses + `/qa-only`; no hard rules, gate or verifier; some skills auto-fix |
 
 ## Recommendation
 
@@ -73,6 +94,16 @@ verification section; (4) a **seeded-bug fixture** to prove both work.
 
 Not adopting a PR bot: it would add CI and key management to every repo and still lack the gate, the hard rules and the
 two-model check. Not building lenses from scratch: the built-ins already do that work and improve with the CLI.
+
+### Addendum 2026-09-25: gstack
+Recommendation unchanged (Integrate Components); gstack becomes an **optional** source of lenses:
+- **Add, conditional:** `/qa-only` as lens L5 (browser QA) when the repo has a web UI. It covers ground nothing else does, and it is report-only.
+- **Add, audit mode only:** `/cso` as a second security lens before client handoff, in report-only framing (decline repair candidates;
+  the I-1 check catches any edits).
+- **Adjacent, not in review:** `/careful` (or `/guard`) during *fix* sessions between a FIX verdict and the re-review.
+- **Not added:** `/review` auto-fixes and duplicates `/code-review`; `/codex` duplicates `ship-review-verify` without checking
+  Claude's specific findings; `/ship` belongs after SHIP, not in the gate.
+- gstack stays optional: `ship-review` must keep working when gstack isn't installed.
 
 ## Open Questions
 - [ ] Does `/simplify` honour a report-only instruction reliably? (Verified in Phase 2 fixture run; fallback = our own simplicity checklist section.)
@@ -87,4 +118,5 @@ Sources: [Codex CLI features](https://developers.openai.com/codex/cli/features) 
 [Codex skills (fsck.com)](https://blog.fsck.com/2025/12/19/codex-skills/) ·
 [Cross-vendor review (MindStudio)](https://www.mindstudio.ai/blog/cross-vendor-ai-agent-review-claude-codex) ·
 [OSS review tools (Augment)](https://www.augmentcode.com/tools/open-source-ai-code-review-tools-worth-trying) ·
+[gstack](https://github.com/garrytan/gstack) · [gstack skills list](https://github.com/garrytan/gstack/blob/main/docs/skills.md) ·
 [Cross-model review (arXiv)](https://arxiv.org/pdf/2607.21656) · [SEVRA-BENCH (arXiv)](https://arxiv.org/pdf/2606.13757)
