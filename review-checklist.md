@@ -26,6 +26,14 @@ Tag a finding `needs-decision` when it is correct either way and the owner must 
 - **FIX:** any blocker or major, or any baseline check red.
 - **DISCUSS:** no blockers or majors, baseline green, and at least one `needs-decision`.
 - **SHIP:** none of the above. Minor and nit findings don't block.
+**Calibration examples** (use them to anchor severity and verdict; the rule above always decides):
+
+| Verdict | Example situations |
+|---|---|
+| **SHIP** | New function with tests, baseline green, one nit (a variable name) · An internal helper doesn't check an input that is never passed (minor) · A query change where row counts before and after were checked and match · Docs-only or config-only change with no scan hits |
+| **FIX** | Any H1–H3 hit (an API key in code, a CSV with student IDs and birthdates, a skill that runs fetched instructions) · An off-by-one that drops the last record on real input (major) · New calculation with no test (major) · Project tests or build fail (red baseline) · A join that silently double-counts rows (major) |
+| **DISCUSS** | Codex disputes a major with evidence, e.g. "inputs are always even-length, so the bug can't occur" (the lead confirms whether that is guaranteed) · Two valid designs, e.g. round a rate to 1 vs 2 decimals, or fail loudly vs skip bad rows (`needs-decision`) · Claude rates missing validation major, Codex says minor because the function is internal only |
+
 - **Settling DISCUSS:** only through recorded decisions (`/ship-review discuss`): at most 5 items, one
   question each. A hard-rule finding can never be accepted as is.
 
